@@ -1,6 +1,7 @@
 using Backend.Context;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
+using Backend.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,8 @@ builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 var app = builder.Build();
+
+app.MapEndpoint();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
