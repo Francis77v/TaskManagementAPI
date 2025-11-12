@@ -12,6 +12,6 @@ public partial class ProjectTeam
 
     public int Projectid { get; set; }
     public Role role { get; set; } 
-    public virtual Project Project { get; set; } = null!;
-    public virtual Users User { get; set; } = null!;
+    public virtual Project ProjectNavigation { get; set; } = null!;
+    public virtual Users UserNavigation { get; set; } = null!;
 }
