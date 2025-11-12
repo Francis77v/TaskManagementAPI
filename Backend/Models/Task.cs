@@ -33,7 +33,7 @@ public partial class Task
 
     public virtual Task? ParenttaskNavigation { get; set; }
 
-    public virtual Project Project { get; set; } = null!;
+    public virtual Project ProjectNavigation { get; set; } = null!;
 
-    public virtual TaskStatus? Status { get; set; }
+    public virtual TaskStatus? StatusNavigation { get; set; }
 }

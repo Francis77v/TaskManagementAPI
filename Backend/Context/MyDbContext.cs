@@ -23,10 +23,41 @@ public partial class MyDbContext : DbContext
     public virtual DbSet<Task> Tasks { get; set; }
 
     public virtual DbSet<TaskStatus> TaskStatuses { get; set; }
+    
+    public virtual DbSet<Users> User { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        
+        modelBuilder.Entity<ProjectTeam>()
+            .HasOne(e => e.UserNavigation)
+            .WithMany(e => e.ProjectTeams)
+            .HasForeignKey(e => e.Userid)
+            .IsRequired();
+        modelBuilder.Entity<Task>()
+            .HasOne(e => e.CreatedbyNavigation)
+            .WithMany(e => e.Tasks)
+            .HasForeignKey(e => e.CreatedbyNavigation)
+            .IsRequired();
+        modelBuilder.Entity<Task>()
+            .HasOne(e => e.AssignedtoNavigation)
+            .WithMany(e => e.Tasks)
+            .HasForeignKey(e => e.AssignedtoNavigation)
+            .IsRequired();
+        modelBuilder.Entity<Task>()
+            .HasOne(e => e.ProjectNavigation)
+            .WithMany(e => e.Tasks)
+            .HasForeignKey(e => e.ProjectNavigation)
+            .IsRequired();
+        modelBuilder.Entity<Comment>()
+            .HasOne(e => e.CommentbyNavigation)
+            .WithMany(e => e.Comments)
+            .HasForeignKey(e => e.CommentbyNavigation)
+            .IsRequired();
+        modelBuilder.Entity<ProjectTeam>()
+            .HasOne(e => e.ProjectNavigation)
+            .WithMany(e => e.ProjectTeams)
+            .HasForeignKey(e => e.ProjectNavigation)
+            .IsRequired();
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
