@@ -2,6 +2,7 @@ using Backend.Context;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Backend.Endpoints;
+using Backend.Services.ProductServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,8 @@ var connectionString = $"Host={host};Port={port};Database={dbName};Username={use
 // DbContext
 builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseNpgsql(connectionString));
+//DI
+builder.Services.AddScoped<ProjectCRUD>();
 
 var app = builder.Build();
 
