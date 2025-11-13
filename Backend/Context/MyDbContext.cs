@@ -58,6 +58,22 @@ public partial class MyDbContext : DbContext
             .WithMany(e => e.ProjectTeams)
             .HasForeignKey(e => e.ProjectNavigation)
             .IsRequired();
+        modelBuilder.Entity<Task>()
+            .HasOne(e => e.StatusNavigation)
+            .WithMany(e => e.Tasks)
+            .HasForeignKey(e => e.StatusNavigation)
+            .IsRequired();
+        modelBuilder.Entity<Task>()
+            .HasOne(e => e.ParenttaskNavigation)
+            .WithMany(e => e.InverseParenttaskNavigation)
+            .HasForeignKey(e => e.ParenttaskNavigation)
+            .IsRequired(false);
+        modelBuilder.Entity<Comment>()
+            .HasOne(e => e.CommentbyNavigation)
+            .WithMany(e => e.Comments)
+            .HasForeignKey(e => e.CommentbyNavigation)
+            .IsRequired();
+
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
