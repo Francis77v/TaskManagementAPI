@@ -36,4 +36,5 @@ public partial class Task
     public virtual Project ProjectNavigation { get; set; } = null!;
 
     public virtual TaskStatus? StatusNavigation { get; set; }
+    public virtual ICollection<Comment> CommentNavigation { get; set; } = new List<Comment>();
 }
