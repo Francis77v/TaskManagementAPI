@@ -1,8 +1,15 @@
+using System.Text;
 using Backend.Context;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Backend.Endpoints;
+using Backend.Models;
+using Backend.Services.Auth;
 using Backend.Services.ProductServices;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +29,37 @@ var pass = Environment.GetEnvironmentVariable("DB_PASS");
 
 var connectionString = $"Host={host};Port={port};Database={dbName};Username={user};Password={pass}";
 
+// JWT Auth
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
+    // .AddGoogle(GoogleDefaults.AuthenticationScheme, googleOptions =>
+    // {
+    //     googleOptions.ClientId = configuration["Authentication:Google:ClientId"];
+    //     googleOptions.ClientSecret = configuration["Authentication:Google:ClientSecret"];
+    // });
+
+// 3. Add Authorization
+builder.Services.AddAuthorization();
+//DI Services
+builder.Services.AddScoped<AuthServices>();
+
 // DbContext
 builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseNpgsql(connectionString));
@@ -30,6 +68,10 @@ builder.Services.AddScoped<ProjectCRUD>();
 
 var app = builder.Build();
 
+// Middleware order
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapEndpoint();
 
 // Configure the HTTP request pipeline.
