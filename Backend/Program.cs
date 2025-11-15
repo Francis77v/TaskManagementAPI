@@ -2,7 +2,6 @@ using System.Text;
 using Backend.Context;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
-using Backend.Endpoints;
 using Backend.Models;
 using Backend.Services.Auth;
 using Backend.Services.ProductServices;
@@ -10,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,7 +55,17 @@ builder.Services.AddAuthentication(options =>
     //     googleOptions.ClientSecret = configuration["Authentication:Google:ClientSecret"];
     // });
 
-// 3. Add Authorization
+builder.Services.AddIdentityCore<Users>(options =>
+    {
+        options.Password.RequireDigit = false;
+        options.Password.RequiredLength = 6;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+    })
+    .AddEntityFrameworkStores<MyDbContext>()
+    .AddDefaultTokenProviders();
+
+
 builder.Services.AddAuthorization();
 //DI Services
 builder.Services.AddScoped<AuthServices>();
@@ -66,18 +76,23 @@ builder.Services.AddDbContext<MyDbContext>(options =>
 //DI
 builder.Services.AddScoped<ProjectCRUD>();
 
+
+builder.Services.AddControllers();
 var app = builder.Build();
 
 // Middleware order
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapEndpoint();
+
+app.MapControllers();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
