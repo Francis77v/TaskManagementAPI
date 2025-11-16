@@ -4,7 +4,7 @@ using System.Text;
 using Backend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-
+using Backend.DTO;
 namespace Backend.Services.Auth;
 
 public class AuthServices
@@ -17,10 +17,10 @@ public class AuthServices
         _userManager = userManager;
         _config = configuration;
     }
-    public async Task<String?> ValidateUserAsync(string username, string password)
+    public async Task<String?> ValidateUserAsync(LoginDTO user)
     {
-        var users = await _userManager.FindByNameAsync(username);
-        if (users != null && await _userManager.CheckPasswordAsync(users, password))
+        var users = await _userManager.FindByNameAsync(user.username);
+        if (users != null && await _userManager.CheckPasswordAsync(users, user.password))
         {
             return await GenerateJwtToken(users); 
         }

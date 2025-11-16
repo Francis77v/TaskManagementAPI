@@ -49,11 +49,7 @@ builder.Services.AddAuthentication(options =>
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
-    // .AddGoogle(GoogleDefaults.AuthenticationScheme, googleOptions =>
-    // {
-    //     googleOptions.ClientId = configuration["Authentication:Google:ClientId"];
-    //     googleOptions.ClientSecret = configuration["Authentication:Google:ClientSecret"];
-    // });
+
 
 builder.Services.AddIdentityCore<Users>(options =>
     {

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-
+using Backend.DTO;
+using Backend.Services.Auth;
 namespace Backend.Controllers;
 
 [Route("api/[controller]")]
@@ -7,11 +8,10 @@ namespace Backend.Controllers;
 public class AuthController : ControllerBase
 {
     [HttpGet("test")]
-    public async Task<string> TestController()
+    public async Task<string> TestController(LoginDTO user, AuthServices service)
     {
-        // Simulate async work (optional)
-        await Task.Delay(10);
-        return "Hello from AuthController!";
+        var login = await service.ValidateUserAsync(user);
+        return 
     }
 }
 
