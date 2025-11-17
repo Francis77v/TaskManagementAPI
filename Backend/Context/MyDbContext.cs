@@ -34,9 +34,9 @@ public partial class MyDbContext : DbContext
             .HasForeignKey(e => e.Userid)
             .IsRequired();
         modelBuilder.Entity<Task>()
-            .HasOne(e => e.CreatedbyNavigation)
+            .HasOne(e => e.CreatorNavigation)
             .WithMany(e => e.Tasks)
-            .HasForeignKey(e => e.CreatedbyNavigation)
+            .HasForeignKey(e => e.CreatorNavigation)
             .IsRequired();
         modelBuilder.Entity<Task>()
             .HasOne(e => e.AssignedtoNavigation)
@@ -73,6 +73,9 @@ public partial class MyDbContext : DbContext
             .WithMany(e => e.Comments)
             .HasForeignKey(e => e.CommentbyNavigation)
             .IsRequired();
+        modelBuilder.Entity<Task>()
+            .HasOne(e => e.CommentNavigation)
+            .WithMany(e => e.)
 
     }
 

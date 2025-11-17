@@ -17,35 +17,50 @@ public class AuthServices
         _userManager = userManager;
         _config = configuration;
     }
+    
     public async Task<String?> ValidateUserAsync(LoginDTO user)
     {
-        var users = await _userManager.FindByNameAsync(user.username);
-        if (users != null && await _userManager.CheckPasswordAsync(users, user.password))
+        try
         {
-            return await GenerateJwtToken(users); 
+            var users = await _userManager.FindByNameAsync(user.username);
+            if (users != null && await _userManager.CheckPasswordAsync(users, user.password))
+            {
+                return await GenerateJwtToken(users); 
+            }
+            return "User not found";
         }
-        return null;
+        catch (Exception e)
+        {
+            return e.Message;
+        }
+        
     }
 
     private async Task<string> GenerateJwtToken(Users user)
     {
-        var claims = new List<Claim>
+        var exp = new DateTimeOffset(DateTime.UtcNow.AddMinutes(60)).ToUnixTimeSeconds();
+        var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.UserName!),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.NameIdentifier, user.Id)
+            new Claim(JwtRegisteredClaimNames.Iat, 
+                new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(),
+                ClaimValueTypes.Integer64),
+            new Claim(JwtRegisteredClaimNames.Exp, exp.ToString(), ClaimValueTypes.Integer64)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
             issuer: _config["Jwt:Issuer"],
             audience: _config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(_config["Jwt:ExpireMinutes"])),
+            expires: DateTime.UtcNow.AddMinutes(
+                double.Parse(_config["Jwt:ExpiresInMinutes"]!)
+            ),
             signingCredentials: creds
-        );
+            );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }

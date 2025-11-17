@@ -29,12 +29,10 @@ var pass = Environment.GetEnvironmentVariable("DB_PASS");
 
 var connectionString = $"Host={host};Port={port};Database={dbName};Username={user};Password={pass}";
 
-// JWT Auth
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
+var jwtConfig = builder.Configuration.GetSection("Jwt");
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -43,12 +41,14 @@ builder.Services.AddAuthentication(options =>
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            ValidIssuer = jwtConfig["Issuer"],
+            ValidAudience = jwtConfig["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your_super_secret_key"))
         };
-    }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
+    });
+
+builder.Services.AddAuthorization();
+builder.Services.AddControllers();
 
 
 builder.Services.AddIdentityCore<Users>(options =>
@@ -60,9 +60,6 @@ builder.Services.AddIdentityCore<Users>(options =>
     })
     .AddEntityFrameworkStores<MyDbContext>()
     .AddDefaultTokenProviders();
-
-
-builder.Services.AddAuthorization();
 //DI Services
 builder.Services.AddScoped<AuthServices>();
 

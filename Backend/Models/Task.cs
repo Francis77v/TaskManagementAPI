@@ -27,7 +27,7 @@ public partial class Task
 
     public virtual Users? AssignedtoNavigation { get; set; }
 
-    public virtual Users CreatedbyNavigation { get; set; } = null!;
+    public virtual Users CreatorNavigation { get; set; } = null!;
 
     public virtual ICollection<Task> InverseParenttaskNavigation { get; set; } = new List<Task>();
 

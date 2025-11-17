@@ -7,11 +7,19 @@ namespace Backend.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
-    [HttpGet("test")]
-    public async Task<string> TestController(LoginDTO user, AuthServices service)
+    [HttpPost("login")]
+    public async Task<IActionResult> TestController(LoginDTO user, [FromServices] AuthServices service)
     {
-        var login = await service.ValidateUserAsync(user);
-        return 
+        try
+        {
+            var login = await service.ValidateUserAsync(user);
+            return Ok(login);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(new { message = e.Message });
+        }
     }
+
 }
 
