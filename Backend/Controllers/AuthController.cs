@@ -1,5 +1,5 @@
+using Backend.DTO.AuthDTO;
 using Microsoft.AspNetCore.Mvc;
-using Backend.DTO;
 using Backend.Services.Auth;
 namespace Backend.Controllers;
 
@@ -13,13 +13,24 @@ public class AuthController : ControllerBase
         try
         {
             var login = await service.ValidateUserAsync(user);
-            return Ok(login);
+            return StatusCode(login.statusCode, login);
         }
         catch (Exception e)
         {
-            return BadRequest(new { message = e.Message });
+            return StatusCode(500, new APIResponseDTO<object>
+            {
+                success = false,
+                statusCode = 500,
+                message = "An unexpected error occurred",
+                data = null,
+                Errors = new List<ErrorDetailDTO>
+                {
+                    new ErrorDetailDTO { field = null, error = e.Message }
+                }
+            });
         }
     }
+
 
 }
 

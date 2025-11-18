@@ -68,6 +68,7 @@ builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseNpgsql(connectionString));
 //DI
 builder.Services.AddScoped<ProjectCRUD>();
+// builder.Services.AddSingleton
 
 
 builder.Services.AddControllers();

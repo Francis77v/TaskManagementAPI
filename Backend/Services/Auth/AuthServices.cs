@@ -1,68 +1,122 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
+using Backend.DTO.AuthDTO;
 using Backend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using Backend.DTO;
+using Backend.Controllers;
 namespace Backend.Services.Auth;
+using Backend.DTO.AuthDTO;
 
 public class AuthServices
 {
     private readonly UserManager<Users> _userManager;
     private readonly IConfiguration _config;
+    // private readonly ILogger<AuthController> _logger;
     
     public AuthServices(UserManager<Users> userManager, IConfiguration configuration)
     {
         _userManager = userManager;
         _config = configuration;
+        // _logger = logger;
     }
     
-    public async Task<String?> ValidateUserAsync(LoginDTO user)
+    public async Task<APIResponseDTO<TokenDTO>> ValidateUserAsync(LoginDTO user)
     {
         try
         {
             var users = await _userManager.FindByNameAsync(user.username);
             if (users != null && await _userManager.CheckPasswordAsync(users, user.password))
             {
-                return await GenerateJwtToken(users); 
+                var tokenString = await GenerateJwtTokenAsync(users);
+                var token = new APIResponseDTO<TokenDTO>
+                {
+                    success = true,
+                    statusCode = 200,
+                    message = "Welcome!",
+                    data = tokenString,
+                    Errors = null
+                };
+                return token;
             }
-            return "User not found";
+
+            var response = new APIResponseDTO<TokenDTO>
+            {
+                success = false,
+                statusCode = 404,
+                message = "User not found",
+                data = null,
+                Errors = new List<ErrorDetailDTO>
+                {
+                    new ErrorDetailDTO
+                    {
+                        field = null,
+                        error = "User not found."
+                    }
+                }
+            };
+            return response;
         }
         catch (Exception e)
         {
-            return e.Message;
+            var response = new APIResponseDTO<TokenDTO>
+            {
+                success = false,
+                statusCode = 404,
+                message = e.Message,
+                data = null,
+                Errors = new List<ErrorDetailDTO>
+                {
+                    new ErrorDetailDTO
+                    {
+                        field = null,
+                        error = e.Message
+                    }
+                }
+            };
+            return response;
         }
-        
     }
 
-    private async Task<string> GenerateJwtToken(Users user)
+    private async Task<TokenDTO> GenerateJwtTokenAsync(Users user)
     {
-        var exp = new DateTimeOffset(DateTime.UtcNow.AddMinutes(60)).ToUnixTimeSeconds();
+        var expiresInMinutes = double.Parse(_config["Jwt:ExpiresInMinutes"]!);
+        var expiration = DateTime.UtcNow.AddMinutes(expiresInMinutes);
+
+        // Access token claims
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(JwtRegisteredClaimNames.Iat, 
-                new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(),
-                ClaimValueTypes.Integer64),
-            new Claim(JwtRegisteredClaimNames.Exp, exp.ToString(), ClaimValueTypes.Integer64)
+                new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+            new Claim(JwtRegisteredClaimNames.Exp, 
+                new DateTimeOffset(expiration).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var token = new JwtSecurityToken(
+        // Create access token
+        var accessToken = new JwtSecurityToken(
             issuer: _config["Jwt:Issuer"],
             audience: _config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(
-                double.Parse(_config["Jwt:ExpiresInMinutes"]!)
-            ),
+            expires: expiration,
             signingCredentials: creds
-            );
+        );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var accessTokenString = new JwtSecurityTokenHandler().WriteToken(accessToken);
+        var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+
+        return new TokenDTO
+        {
+            AccessToken = accessTokenString,
+            RefreshToken = refreshToken,
+        };
     }
 
 }
