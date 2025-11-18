@@ -18,4 +18,6 @@ public partial class Comment
     public string Commentby { get; set; } = null!;
 
     public virtual Users CommentbyNavigation { get; set; } = null!;
+    
+    public virtual Task TaskNavigation { get; set; } = null!;
 }
