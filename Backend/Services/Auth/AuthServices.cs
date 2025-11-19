@@ -25,57 +25,23 @@ public class AuthServices
     
     public async Task<APIResponseDTO<TokenDTO>> ValidateUserAsync(LoginDTO user)
     {
+        
         try
         {
             var users = await _userManager.FindByNameAsync(user.username);
             if (users != null && await _userManager.CheckPasswordAsync(users, user.password))
             {
                 var tokenString = await GenerateJwtTokenAsync(users);
-                var token = new APIResponseDTO<TokenDTO>
-                {
-                    success = true,
-                    statusCode = 200,
-                    message = "Welcome!",
-                    data = tokenString,
-                    Errors = null
-                };
-                return token;
+                return APIResponse.SuccessResponse(tokenString);
             }
-
-            var response = new APIResponseDTO<TokenDTO>
+            else
             {
-                success = false,
-                statusCode = 404,
-                message = "User not found",
-                data = null,
-                Errors = new List<ErrorDetailDTO>
-                {
-                    new ErrorDetailDTO
-                    {
-                        field = null,
-                        error = "User not found."
-                    }
-                }
-            };
-            return response;
+                return APIResponse.ErrorResponse<TokenDTO>("User not found.", 404);
+            }
         }
         catch (Exception e)
         {
-            var response = new APIResponseDTO<TokenDTO>
-            {
-                success = false,
-                statusCode = 404,
-                message = e.Message,
-                data = null,
-                Errors = new List<ErrorDetailDTO>
-                {
-                    new ErrorDetailDTO
-                    {
-                        field = null,
-                        error = e.Message
-                    }
-                }
-            };
+            var response = APIResponse.ErrorResponse<TokenDTO>("Internal Server Error", 500);
             return response;
         }
     }
