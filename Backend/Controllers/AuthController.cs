@@ -21,12 +21,8 @@ public class AuthController : ControllerBase
             {
                 success = false,
                 statusCode = 500,
-                message = "An unexpected error occurred",
+                message = e.Message,
                 data = null,
-                Errors = new List<ErrorDetailDTO>
-                {
-                    new ErrorDetailDTO { field = null, error = e.Message }
-                }
             });
         }
     }
