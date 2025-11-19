@@ -41,7 +41,7 @@ public class AuthServices
         }
         catch (Exception e)
         {
-            var response = APIResponse.ErrorResponse<TokenDTO>("Internal Server Error", 500);
+            var response = APIResponse.ErrorResponse<TokenDTO>(e.Message, 500);
             return response;
         }
     }
