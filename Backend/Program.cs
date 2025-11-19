@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Backend.Models;
 using Backend.Services.Auth;
 using Backend.Services.ProductServices;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Backend.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -68,6 +68,7 @@ builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseNpgsql(connectionString));
 //DI
 builder.Services.AddScoped<ProjectCRUD>();
+builder.Services.AddScoped<UserRepository>();
 // builder.Services.AddSingleton
 
 
