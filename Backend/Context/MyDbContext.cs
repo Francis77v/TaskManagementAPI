@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Backend.Models;
+﻿using Backend.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Task = Backend.Models.Task;
@@ -25,7 +23,6 @@ public partial class MyDbContext : IdentityDbContext<Users>
 
     public virtual DbSet<TaskStatus> TaskStatuses { get; set; }
     
-    public virtual DbSet<Users> User { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -84,7 +81,7 @@ public partial class MyDbContext : IdentityDbContext<Users>
             .HasForeignKey(e => e.Taskid)
             .IsRequired();
 
-
+        UserSeeder.seedUsers(modelBuilder);
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
