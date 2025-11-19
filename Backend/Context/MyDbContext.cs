@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using Backend.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Task = Backend.Models.Task;
 using TaskStatus = Backend.Models.TaskStatus;
 
 namespace Backend.Context;
 
-public partial class MyDbContext : DbContext
+public partial class MyDbContext : IdentityDbContext<Users>
 {
     public MyDbContext(DbContextOptions<MyDbContext> options)
         : base(options)
@@ -28,6 +29,7 @@ public partial class MyDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<ProjectTeam>()
             .HasKey(pt => new { pt.Userid, pt.Projectid });
         
