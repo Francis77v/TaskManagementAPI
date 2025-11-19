@@ -1,6 +1,7 @@
 using Backend.DTO.AuthDTO;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Services.Auth;
+using Backend.Services;
 namespace Backend.Controllers;
 
 [Route("api/[controller]")]
@@ -25,6 +26,13 @@ public class AuthController : ControllerBase
                 data = null,
             });
         }
+    }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register(RegisterDTO user, [FromServices] UserServices service)
+    {
+        var result = await service.registerUser(user);
+        return Ok(result);
     }
 
 
