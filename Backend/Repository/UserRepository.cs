@@ -15,7 +15,7 @@ public class UserRepository
         _userManager = manager;
     }
 
-    public async Task<string> AddUser(RegisterDTO user)
+    public async Task<IdentityResult> AddUser(RegisterDTO user)
     {
         var users = new Users
         {
@@ -26,7 +26,16 @@ public class UserRepository
             UserName = user.username,
         };
 
-        await _userManager.CreateAsync(users, user.password);
-        return "User Added";
+        var result = await _userManager.CreateAsync(users, user.password);
+        return result;
     }
+
+    public async Task<bool> UserExists(string username, string email)
+    {
+        var userByName = await _userManager.FindByNameAsync(username);
+        var userByEmail = await _userManager.FindByEmailAsync(email);
+
+        return userByName != null || userByEmail != null;
+    }
+
 }
