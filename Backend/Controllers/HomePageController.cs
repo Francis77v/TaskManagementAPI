@@ -6,7 +6,7 @@ namespace Backend.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthController : ControllerBase
+public class HomePageController : ControllerBase
 {
     [HttpPost("login")]
     public async Task<IActionResult> TestController(LoginDTO user, [FromServices] AuthServices service)
@@ -24,6 +24,7 @@ public class AuthController : ControllerBase
                 statusCode = 500,
                 message = e.Message,
                 data = null,
+                Errors = new List<string> {e.Message}
             });
         }
     }
@@ -31,6 +32,9 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterDTO user, [FromServices] UserServices service)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+        
         var result = await service.registerUser(user);
         return Ok(result);
     }
