@@ -6,6 +6,7 @@ using Backend.Models;
 using Backend.Services.Auth;
 using Backend.Services.ProductServices;
 using Backend.Repository;
+using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -69,6 +70,8 @@ builder.Services.AddDbContext<MyDbContext>(options =>
 //DI
 builder.Services.AddScoped<ProjectCRUD>();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<UserServices>();
+
 // builder.Services.AddSingleton
 
 
